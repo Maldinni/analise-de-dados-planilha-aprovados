@@ -31,22 +31,50 @@ def main():
     # else:
     #     print("erro")
 
-    termo = ['classificado']
+    termo = ['pitágoras', 'pitagoras']
     resultados = encontrar_chave(carregar_planilha(caminho), termo)
 
+    array_resultados = []
+
     if resultados:
-        print(f"\nForam encontradas {len(resultados)} ocorrências de '{termo}':")
+        # print(f"\nForam encontradas {len(resultados)} ocorrências de '{termo}':")
         for item in resultados:
-            print(f"Linha {item['Linha']}, Coluna '{item['Coluna']}': {item['Valor']}")
+            # print(f"Linha {item['Linha']}, Coluna '{item['Coluna']}': {item['Valor']}")
+            array_resultados.append(item)
     else:
         print(f"\nNenhum resultado encontrado para '{termo}'.")
 
+        print("*******************************")
+    
     contagem = 0
 
-    for item in resultados:
+    for item in array_resultados:
         contagem += 1
+        print(item)
     
     print(contagem)
+
+    print("*******************************")
+
+    contagem_cluster1 = 0
+
+    termo_relacionado = ['classificado']
+    resultados_classificado = encontrar_chave(carregar_planilha(caminho), termo_relacionado)
+
+    linhas_com_publico = set()
+    for item in resultados_classificado:
+        linhas_com_publico.add(item['Linha'])
+
+    print("\nLinhas que relacionam o termo com 'classificado':")
+    for item in resultados:
+        if item['Linha'] in linhas_com_publico:
+            contagem_cluster1 += 1
+            print(f"Linha {item['Linha']}: {item['Valor']} (Relacionado a 'classificado')")
+    
+    print(contagem_cluster1)
+
+    print("*******************************")
+
 
 if __name__ == "__main__":
     main()
