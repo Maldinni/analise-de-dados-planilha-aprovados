@@ -1,5 +1,8 @@
 import pandas as pd
 from collections import defaultdict
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def carregar_planilha(caminho_arquivo):
@@ -67,48 +70,107 @@ def verificacao_ribamar(linha_planilha):
         and 'ribamar' not in email  # Não está no e-mail
     )
 
+def verificacao_ufpi(linha_planilha):
+    escola = str(linha_planilha['Escola']).lower() 
+    email = str(linha_planilha['E-mail']).lower()
+    curso = str(linha_planilha['Curso']).lower() # Não está no curso
+    
+    return (
+        'ufpi' in escola
+        and 'ufpi' not in curso
+        and 'ufpi' not in email
+    )
+
+def gerar_heatmap_correlacoes(resultados_uni, linhas_classificado):
+    # Cria uma cópia dos resultados para não alterar os dados originais
+    resultados_para_heatmap = [
+        {**item, 'Cluster': 'CIDADES'} if item['Cluster'] in {'PINHEIRO', 'RIBAMAR'} 
+        else item 
+        for item in resultados_uni
+    ]
+    
+    # Lista de categorias para o heatmap (sem PINHEIRO/RIBAMAR)
+    categorias = [
+        'PÚBLICAS', 'PRIVADAS', 'MULHERES', 'PCD', 
+        '45+', 'NPIQ', 'SLZ', 'CIDADES', 'ENGENHARIAS',
+        'TECNOLOGIA DA INFORMAÇÃO (TI)'
+    ]
+    
+    # Cria matriz de co-ocorrência
+    co_ocorrencias = pd.DataFrame(0, index=categorias, columns=categorias)
+    
+    for linha in linhas_classificado:
+        # Pega todos os clusters consolidados desta linha
+        clusters_linha = {
+            item['Cluster'] for item in resultados_para_heatmap
+            if item['Linha'] == linha and item['Cluster'] in categorias
+        }
+        
+        # Atualiza a matriz
+        for cat1 in clusters_linha:
+            for cat2 in clusters_linha:
+                co_ocorrencias.loc[cat1, cat2] += 1
+    
+    # Configuração do heatmap
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(
+        co_ocorrencias,
+        annot=True,
+        fmt='d',
+        cmap='YlOrRd',
+        linewidths=.5,
+        cbar_kws={'label': 'Número de Alunos'}
+    )
+    plt.title('Heatmap de Correlações (CIDADES inclui Pinheiro/Ribamar)')
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
     caminho = pd.ExcelFile("dados-leitura/Analise Inscrições Pâmela.xlsx")
     planilha = carregar_planilha(caminho)
     
     # Definindo seus clusters manualmente
     clusters_uni = {
-        'PITAGORAS': ['pitágoras', 'pitagoras'],
-        'ANHANGUERA': ['anhanguera'],
-        'CEFET-MA': ['cefet-ma'],
-        'CEUMA': ['ceuma', 'uniceuma'],
-        'CEUPI': ['ceupi'],
-        'CRUZEIRO DO SUL': ['cruzeiro'],
-        'EDUFOR': ['edufor'],
-        'ESTACIO': ['estacio'],
-        'FAVYT': ['favyt'],
-        'FEDERAÇÃO': ['federação das escolas superiores'],
-        'FLORENCE': ['florence'],
-        'IEMA': ['iema'],
-        'IFMA': ['ifma'],
-        'IFPA': ['ifpa'],
-        'IFRB': ['ifrb'],
-        'IFTMA': ['iftma'],
-        'IPOG': ['ipog'],
-        'ISFS': ['isfs'],
-        'MACKENZIE': ['mackenzie'],
-        'Senai': ['senai'],
-        'UEMA': ['uema'],
-        'UFCG': ['ufcg'],
-        'UFMA': ['ufma'],
-        'UFPA': ['ufpa'],
-        'UFPI': ['ufpi'],
-        'UFPR': ['ufpr'],
-        'UFTMA': ['uftma'],
-        'UNDB': ['undb'],
-        'UNIFAEL': ['unifael'],
-        'UNIFSA': ['unifsa'],
-        'UNINASSAU': ['uninassau'],
-        'UNISA': ['unisa'],
-        'Unitins': ['unitins'],
-        'Universidad de Pinar de Río': ['universidad de pinar del rio'],
-        'UNV PARAGUAI': ['unv paraguai'],
-        'Vazias': ['#N/D'],
+        'PÚBLICAS': {
+            'CEFET-MA': ['cefet-ma'],
+            'IFMA': ['ifma'],
+            'IFPA': ['ifpa'],
+            'IFRB': ['ifrb'],
+            'IFTMA': ['iftma'],
+            'IEMA': ['iema'],
+            'UEMA': ['uema'],
+            'UFCG': ['ufcg'],
+            'UFMA': ['ufma'],
+            'UFPA': ['ufpa'],
+            'UFPI': ['ufpi'],
+            'UFPR': ['ufpr'],
+            'UFTMA': ['uftma'],
+            'Universidad de Pinar de Río': ['universidad de pinar del rio'],  # Pública (Cuba)
+            'UNV PARAGUAI': ['unv paraguai']  # Pública (Paraguai)
+        },
+        'PRIVADAS': {
+            'PITAGORAS': ['pitágoras', 'pitagoras'],
+            'ANHANGUERA': ['anhanguera'],
+            'CEUMA': ['ceuma', 'uniceuma'],
+            'CEUPI': ['ceupi'],
+            'CRUZEIO DO SUL': ['cruzeiro'],
+            'EDUFOR': ['edufor'],
+            'ESTACIO': ['estacio'],
+            'FAVYT': ['favyt'],
+            'FEDERAÇÃO': ['federação das escolas superiores'],
+            'FLORENCE': ['florence'],
+            'IPOG': ['ipog'],
+            'ISFS': ['isfs'],
+            'MACKENZIE': ['mackenzie'],
+            'SENAI': ['senai'],
+            'UNDB': ['undb'],
+            'UNIFAEL': ['unifael'],
+            'UNIFSA': ['unifsa'],
+            'UNINASSAU': ['uninassau'],
+            'UNISA': ['unisa'],
+            'UNITINS': ['unitins']
+        },
         'AMPLA': ['ampla', 'concorrencia'],
         '45+': ['45+'],
         'MULHERES': ['mulheres'],
@@ -122,7 +184,86 @@ def main():
                    'governador', 'grajaú', 'imperatriz', 'itapecuru mirim', 'paço do lumiar',
                    'pindaré-mirim', 'pio xii', 'recife', 'rosário', 'santa inês', 'são bento',
                    'nepomuceno', 'teresina', 'tianguá', 'timon'],
-        'CURSOS': [''],
+        # ENGENHARIAS
+        'ENGENHARIAS': {
+            'Engenharia Agronômica': ['Engenharia Agronômica'],
+            'Engenharia Ambiental e Sanitária': ['Engenharia Ambiental e Sanitária / Bacharel em ciência e tecnologia'],
+            'Engenharia Civil': ['Engenharia Civil', 'ENGENHARIA CIVIL'],
+            'Engenharia da Computação': ['Engenharia de Computação', 'Engenheiro de Computação', 'Engenharia da Computação'],
+            'Engenharia de Materiais': ['Engenharia de Materiais'],
+            'Engenharia de Pesca': ['Engenharia de pesca'],
+            'Engenharia de Produção': ['Engenharia de produção'],
+            'Engenharia Elétrica': ['Engenharia Elétrica', 'Bacharelado em Engenharia Elétrica', 'Engenharia Elétrica Industrial'],
+            'Engenharia Mecânica': ['Engenharia mecânica', 'ENGENHARIA MECÂNICA', 'Engenharia Mecânica']
+        },
+
+        # BACHARELADOS INTERDISCIPLINARES
+        'BACHARELADOS INTERDISCIPLINARES': {
+            'Bacharelado em Ciência e Tecnologia': ['Bacharelado em Ciência e Tecnologia - UFMA'],
+            'Bacharelado Interdisciplinar em Ciência e Tecnologia': [
+                'Bacharelado Interdisciplinar em Ciência e Tecnologia (BICT)',
+                'Bacharelado Interdisciplinar em Ciência e Tecnologia(BICT)',
+                'Bacharelado Interdisciplinar em Ciências e Tecnologia',
+                'Bacharelado Ciência E Tecnologia',
+                'CIÊNCIA E TECNOLOGIA',
+                'Ciência e Tecnologia',
+                'Interdisciplinar em Ciência e tecnologia'
+            ]
+        },
+
+        # LICENCIATURAS
+        'LICENCIATURAS': {
+            'Licenciatura em Física': [
+                'Física Licenciatura',
+                'Física - Licenciatura',
+                'Licenciatura em Física',
+                'Ciências com Habilitação em Física'
+            ],
+            'Licenciatura em Matemática': [
+                'LIcenciatura em Matemática',
+                'Licenciatura em matemática',
+                'Matemática licenciatura',
+                'Matemática Licenciatura'
+            ],
+            'Licenciatura em Química': [
+                'Química licenciatura',
+                'Química Licenciatura',
+                'CIÊNCIAS HABILITAÇÃO QUIMICA',
+                'Ciências- Habilitação em Química'
+            ],
+            'Licenciatura em Computação': [
+                'Licenciatura em Computação e Informática'
+            ]
+        },
+
+        # TECNÓLOGOS
+        'TECNÓLOGOS': {
+            'Tecnologia em Gestão da Produção Industrial': [
+                'Tecnologo em Gestão da Produção Industrial',
+                'Tecnólogo em Gestão da Produção Industrial',
+                'Curso superior de Tecnologia em Gestão da produção industrial',
+                'CURSO SUPERIOR DE TECNOLOGIA EM GESTÃO DA PRODUÇÃO INDUSTRIAL - EAD',
+                'GESTÃO DA PRODUÇÃO INDUSTRIAL',
+                'Tecnologia em Gestão da produção Industrial'
+            ],
+            'Tecnologia em Informática': [
+                'Tecnólogo em Informática',
+                'Matemática Licenciatura / Tecnólogo em Informática'
+            ]
+        },
+
+        # TECNOLOGIA DA INFORMAÇÃO (TI) - NOVA CATEGORIA
+        'TECNOLOGIA DA INFORMAÇÃO (TI)': {
+            'Engenharia da Computação': ['Engenharia de Computação', 'Engenharia da Computação'],
+            'Licenciatura em Computação': ['Licenciatura em Computação e Informática'],
+            'Tecnologia em Informática': ['Tecnólogo em Informática'],
+            'Bacharelado em Ciência e Tecnologia (TI)': ['Bacharelado em Ciência e Tecnologia - UFMA']  # Se incluir TI
+        },
+
+        # OUTROS
+        'OUTROS': {
+            'Curso Superior': ['Curso superior']
+        },
         'CLASSIFICADO': ['classificado', 'classificada', 'classificar']
     }
 
@@ -166,16 +307,20 @@ def main():
         resultados_por_cluster[item['Cluster']].append(item)
     
     total_classificados = 0
+    total_vazios_escola = 0
 
     # Exibindo resultados consolidados por cluster
     for cluster_uni, itens in resultados_por_cluster.items():
         print(f"\n=== CLUSTER: {cluster_uni} ===")
         print(f"Total de ocorrências: {len(itens)}")
         print("Termos incluídos:", ', '.join(clusters_uni[cluster_uni]))
+
+        #Bloco construído para guardar o total de classificados para usar para conseguir o total de campos vazios nas colunas dos clusters
         if cluster_uni == 'CLASSIFICADO':
             total_classificados = len(itens)
 
-    print(total_classificados)
+    #print(total_classificados)
+    print(total_vazios_escola)
         
         #Laço genérico para printar todas as ocorrencias de cada termo no cluster por extenso
         #for item in itens:
@@ -193,6 +338,16 @@ def main():
     pitagoras_classificado = [
         item for item in resultados_uni 
         if item['Cluster'] == 'PITAGORAS' and item['Linha'] in linhas_classificado
+    ]
+
+    univ_publica_classificado = [
+        item for item in resultados_uni 
+        if item['Cluster'] == 'PÚBLICAS' and item['Linha'] in linhas_classificado
+    ]
+
+    univ_privada_classificado = [
+        item for item in resultados_uni 
+        if item['Cluster'] == 'PRIVADAS' and item['Linha'] in linhas_classificado
     ]
     
     mulheres_classificado = [
@@ -233,6 +388,16 @@ def main():
     cidades_classificado = [
         item for item in resultados_uni 
         if item['Cluster'] == 'CIDADES' and item['Linha'] in linhas_classificado
+    ]
+
+    engenharias_classificado = [
+        item for item in resultados_uni 
+        if item['Cluster'] == 'ENGENHARIAS' and item['Linha'] in linhas_classificado
+    ]
+
+    tecinfo_classificado = [
+        item for item in resultados_uni 
+        if item['Cluster'] == 'TECNOLOGIA DA INFORMAÇÃO (TI)' and item['Linha'] in linhas_classificado
     ]
 
     ampla_classificado = [
@@ -278,11 +443,36 @@ def main():
         print(f"Linha {item['Linha']}: {item['Valor']}")
     print(f"===================================================")
 
+    print(f"Ocorrências de Universidades públicas em linhas CLASSIFICADO: {len(univ_publica_classificado)}")
+    for item in univ_publica_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
+
+    print(f"Ocorrências de Universidades privadas em linhas CLASSIFICADO: {len(univ_privada_classificado)}")
+    for item in univ_privada_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
+
+    print(f"Ocorrências de Engenharias em linhas CLASSIFICADO: {len(engenharias_classificado)}")
+    for item in engenharias_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
+
+    print(f"Ocorrências de Engenharias em linhas CLASSIFICADO: {len(tecinfo_classificado)}")
+    for item in tecinfo_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
+
     #print(f"Ocorrências de AMPLA em linhas CLASSIFICADO: {len(ampla_classificado)}")
     #for item in ampla_classificado:
         #print(f"Linha {item['Linha']}: {item['Valor']}")
 
     #print(resultados_por_cluster)
+
+# Dados para o heatmap de correlação
+
+    gerar_heatmap_correlacoes(resultados_uni, linhas_classificado)
+
 
 if __name__ == "__main__":
     main()
