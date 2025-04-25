@@ -91,9 +91,11 @@ def gerar_heatmap_correlacoes(resultados_uni, linhas_classificado):
     
     # Lista de categorias para o heatmap (sem PINHEIRO/RIBAMAR)
     categorias = [
-        'PÚBLICAS', 'PRIVADAS', 'MULHERES', 'PCD', 
-        '45+', 'NPIQ', 'SLZ', 'CIDADES', 'ENGENHARIAS',
-        'TECNOLOGIA DA INFORMAÇÃO (TI)'
+        'PÚBLICAS', 'PRIVADAS', 'AMPLA', 'MULHERES', 'PCD', 
+        '45+', 'NEGROS, PARDOS, INDÍGENAS E QUILOMBOLAS', 'SÃO LUÍS', 'CIDADES', 'ENGENHARIAS (EXCETO TI)',
+        'CURSOS DE TECNOLOGIA DA INFORMAÇÃO (TI)',
+        'CIÊNCIAS EXATAS/TECNOLÓGICOS (EXCETO TI)',
+        'FORMAÇÃO TÉCNICA'
     ]
     
     # Cria matriz de co-ocorrência
@@ -174,9 +176,9 @@ def main():
         'AMPLA': ['ampla', 'concorrencia'],
         '45+': ['45+'],
         'MULHERES': ['mulheres'],
-        'NPIQ': ['negros'],
+        'NEGROS, PARDOS, INDÍGENAS E QUILOMBOLAS': ['negros'],
         'PCD': ['pcds'],
-        'SLZ': ['são luís'],
+        'SÃO LUÍS': ['são luís'],
         'PINHEIRO': ['pinheiro'],
         'RIBAMAR': ['ribamar'],
         'CIDADES': ['bacabal', 'balsas', 'barra do corda', 'bom jesus das selvas',
@@ -184,88 +186,27 @@ def main():
                    'governador', 'grajaú', 'imperatriz', 'itapecuru mirim', 'paço do lumiar',
                    'pindaré-mirim', 'pio xii', 'recife', 'rosário', 'santa inês', 'são bento',
                    'nepomuceno', 'teresina', 'tianguá', 'timon'],
-        # ENGENHARIAS
-        'ENGENHARIAS': {
-            'Engenharia Agronômica': ['Engenharia Agronômica'],
-            'Engenharia Ambiental e Sanitária': ['Engenharia Ambiental e Sanitária / Bacharel em ciência e tecnologia'],
-            'Engenharia Civil': ['Engenharia Civil', 'ENGENHARIA CIVIL'],
-            'Engenharia da Computação': ['Engenharia de Computação', 'Engenheiro de Computação', 'Engenharia da Computação'],
-            'Engenharia de Materiais': ['Engenharia de Materiais'],
-            'Engenharia de Pesca': ['Engenharia de pesca'],
-            'Engenharia de Produção': ['Engenharia de produção'],
-            'Engenharia Elétrica': ['Engenharia Elétrica', 'Bacharelado em Engenharia Elétrica', 'Engenharia Elétrica Industrial'],
-            'Engenharia Mecânica': ['Engenharia mecânica', 'ENGENHARIA MECÂNICA', 'Engenharia Mecânica']
-        },
-
-        # BACHARELADOS INTERDISCIPLINARES
-        'BACHARELADOS INTERDISCIPLINARES': {
-            'Bacharelado em Ciência e Tecnologia': ['Bacharelado em Ciência e Tecnologia - UFMA'],
-            'Bacharelado Interdisciplinar em Ciência e Tecnologia': [
-                'Bacharelado Interdisciplinar em Ciência e Tecnologia (BICT)',
-                'Bacharelado Interdisciplinar em Ciência e Tecnologia(BICT)',
-                'Bacharelado Interdisciplinar em Ciências e Tecnologia',
-                'Bacharelado Ciência E Tecnologia',
-                'CIÊNCIA E TECNOLOGIA',
-                'Ciência e Tecnologia',
-                'Interdisciplinar em Ciência e tecnologia'
-            ]
-        },
-
-        # LICENCIATURAS
-        'LICENCIATURAS': {
-            'Licenciatura em Física': [
-                'Física Licenciatura',
-                'Física - Licenciatura',
-                'Licenciatura em Física',
-                'Ciências com Habilitação em Física'
-            ],
-            'Licenciatura em Matemática': [
-                'LIcenciatura em Matemática',
-                'Licenciatura em matemática',
-                'Matemática licenciatura',
-                'Matemática Licenciatura'
-            ],
-            'Licenciatura em Química': [
-                'Química licenciatura',
-                'Química Licenciatura',
-                'CIÊNCIAS HABILITAÇÃO QUIMICA',
-                'Ciências- Habilitação em Química'
-            ],
-            'Licenciatura em Computação': [
-                'Licenciatura em Computação e Informática'
-            ]
-        },
-
-        # TECNÓLOGOS
-        'TECNÓLOGOS': {
-            'Tecnologia em Gestão da Produção Industrial': [
-                'Tecnologo em Gestão da Produção Industrial',
-                'Tecnólogo em Gestão da Produção Industrial',
-                'Curso superior de Tecnologia em Gestão da produção industrial',
-                'CURSO SUPERIOR DE TECNOLOGIA EM GESTÃO DA PRODUÇÃO INDUSTRIAL - EAD',
-                'GESTÃO DA PRODUÇÃO INDUSTRIAL',
-                'Tecnologia em Gestão da produção Industrial'
-            ],
-            'Tecnologia em Informática': [
-                'Tecnólogo em Informática',
-                'Matemática Licenciatura / Tecnólogo em Informática'
-            ]
-        },
-
-        # TECNOLOGIA DA INFORMAÇÃO (TI) - NOVA CATEGORIA
-        'TECNOLOGIA DA INFORMAÇÃO (TI)': {
-            'Engenharia da Computação': ['Engenharia de Computação', 'Engenharia da Computação'],
-            'Licenciatura em Computação': ['Licenciatura em Computação e Informática'],
-            'Tecnologia em Informática': ['Tecnólogo em Informática'],
-            'Bacharelado em Ciência e Tecnologia (TI)': ['Bacharelado em Ciência e Tecnologia - UFMA']  # Se incluir TI
-        },
-
-        # OUTROS
-        'OUTROS': {
-            'Curso Superior': ['Curso superior']
-        },
-        'CLASSIFICADO': ['classificado', 'classificada', 'classificar']
-    }
+        # ENGENHARIAS (NÃO-TI)
+        'ENGENHARIAS (EXCETO TI)': [
+            'Cursos de Engenharia (exceto os de Engenharia de Software, Engenharia de Computação ou similares)'
+        ],
+        
+        # COMPUTAÇÃO/TI
+        'CURSOS DE TECNOLOGIA DA INFORMAÇÃO (TI)': [
+            'Cursos de Engenharia de Software, Engenharia de Computação, Ciência da Computação, Sistemas de Informação, Análise de Sistemas ou similares'
+        ],
+        
+        # CIÊNCIAS EXATAS/TECNOLÓGICOS (NÃO-TI)
+        'CIÊNCIAS EXATAS/TECNOLÓGICOS (EXCETO TI)': [
+            'Outros cursos de ciências exatas ou tecnológicos (exceto os de Engenharia de Software, Engenharia de Computação, Ciência da Computação, Sistemas de Informação, Análise de Sistemas ou similares)'
+        ],
+        
+        # FORMAÇÃO TÉCNICA
+        'FORMAÇÃO TÉCNICA': [
+            'Formados em cursos técnicos de nível médio na área de Ciências Exatas'
+        ],
+            'CLASSIFICADO': ['classificado', 'classificada', 'classificar']
+        }
 
     # Busca por todos os clusters
     resultados_uni = encontrar_chave(planilha, clusters_uni)
@@ -367,12 +308,12 @@ def main():
 
     npiq_classificado = [
         item for item in resultados_uni 
-        if item['Cluster'] == 'NPIQ' and item['Linha'] in linhas_classificado
+        if item['Cluster'] == 'Negros, Pardos, Indígenas e Quilombolas' and item['Linha'] in linhas_classificado
     ]
 
     slz_classificado = [
         item for item in resultados_uni 
-        if item['Cluster'] == 'SLZ' and item['Linha'] in linhas_classificado
+        if item['Cluster'] == 'São Luís' and item['Linha'] in linhas_classificado
     ]
 
     pinheiro_classificado = [
@@ -392,12 +333,22 @@ def main():
 
     engenharias_classificado = [
         item for item in resultados_uni 
-        if item['Cluster'] == 'ENGENHARIAS' and item['Linha'] in linhas_classificado
+        if item['Cluster'] == 'ENGENHARIAS (EXCETO TI)' and item['Linha'] in linhas_classificado
     ]
 
     tecinfo_classificado = [
         item for item in resultados_uni 
-        if item['Cluster'] == 'TECNOLOGIA DA INFORMAÇÃO (TI)' and item['Linha'] in linhas_classificado
+        if item['Cluster'] == 'CURSOS DE TECNOLOGIA DA INFORMAÇÃO (TI)' and item['Linha'] in linhas_classificado
+    ]
+
+    exatas_classificado = [
+        item for item in resultados_uni 
+        if item['Cluster'] == 'CIÊNCIAS EXATAS/TECNOLÓGICOS (EXCETO TI)' and item['Linha'] in linhas_classificado
+    ]
+
+    ftecnica_classificado = [
+        item for item in resultados_uni 
+        if item['Cluster'] == 'FORMAÇÃO TÉCNICA' and item['Linha'] in linhas_classificado
     ]
 
     ampla_classificado = [
@@ -408,6 +359,11 @@ def main():
     #print(f"Ocorrências de PITAGORAS em linhas CLASSIFICADO: {len(pitagoras_classificado)}")
     #for item in pitagoras_classificado:
         #print(f"Linha {item['Linha']}: {item['Valor']}")
+
+    print(f"Ocorrências de AMPLA em linhas CLASSIFICADO: {len(ampla_classificado)}")
+    for item in ampla_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
 
     print(f"Ocorrências de MULHERES em linhas CLASSIFICADO: {len(mulheres_classificado)}")
     for item in mulheres_classificado:
@@ -458,8 +414,18 @@ def main():
         print(f"Linha {item['Linha']}: {item['Valor']}")
     print(f"===================================================")
 
-    print(f"Ocorrências de Engenharias em linhas CLASSIFICADO: {len(tecinfo_classificado)}")
+    print(f"Ocorrências de Tecnologia da Informação em linhas CLASSIFICADO: {len(tecinfo_classificado)}")
     for item in tecinfo_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
+
+    print(f"Ocorrências de Ciências Exatas/Tecnológicas em linhas CLASSIFICADO: {len(exatas_classificado)}")
+    for item in exatas_classificado:
+        print(f"Linha {item['Linha']}: {item['Valor']}")
+    print(f"===================================================")
+
+    print(f"Ocorrências de Formação Técnica em linhas CLASSIFICADO: {len(ftecnica_classificado)}")
+    for item in ftecnica_classificado:
         print(f"Linha {item['Linha']}: {item['Valor']}")
     print(f"===================================================")
 
